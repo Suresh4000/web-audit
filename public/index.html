@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>Website Audit Studio</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/"><span class="brand-mark">WA</span><span>Website <b>Audit Studio</b><small>PHASE 1 · HTTP AUDIT</small></span></a>
+      <span class="local-pill"><span></span> LOCAL WORKSPACE</span>
+    </header>
+    <main>
+      <section class="hero">
+        <div class="eyebrow"><span class="eyebrow-line"></span> WEBSITE HEALTH CHECK</div>
+        <h1>Know what your website<br /><span>is telling the world.</span></h1>
+        <p>Run a quick HTTP and on-page SEO audit. Get response details, essential metadata checks, and actionable findings in one place.</p>
+        <form id="audit-form" class="audit-form">
+          <label class="sr-only" for="url-input">Website URL</label>
+          <span class="url-icon">↗</span>
+          <input id="url-input" type="url" placeholder="https://example.com" value="https://example.com" autocomplete="url" required />
+          <button id="audit-button" type="submit"><span>Run audit</span><span aria-hidden="true">→</span></button>
+        </form>
+        <div class="form-note"><span class="lock">♧</span> HTTP and HTTPS only · Public websites only · No browser rendering yet</div>
+      </section>
+
+      <section id="status-panel" class="status-panel" aria-live="polite" hidden>
+        <div class="status-head"><div><div class="eyebrow">AUDIT STATUS</div><h2 id="status-title">Ready to audit</h2></div><span id="status-badge" class="badge">READY</span></div>
+        <div class="progress-track"><div id="progress-bar"></div></div>
+        <p id="status-message">Your audit results will appear here.</p>
+      </section>
+
+      <section id="results" hidden>
+        <div class="section-heading"><div><div class="eyebrow">AUDIT OVERVIEW</div><h2>Results</h2></div><button id="download-json" class="secondary-button" type="button">Export JSON ↗</button></div>
+        <div class="stats-grid">
+          <article class="stat-card"><span>HTTP STATUS</span><strong id="stat-status">—</strong><small id="stat-status-note">Response code</small></article>
+          <article class="stat-card"><span>RESPONSE TIME</span><strong id="stat-time">—</strong><small>Time to receive response</small></article>
+          <article class="stat-card"><span>FINDINGS</span><strong id="stat-findings">—</strong><small>Items to review</small></article>
+          <article class="stat-card"><span>REDIRECTS</span><strong id="stat-redirects">—</strong><small>Redirect hops detected</small></article>
+        </div>
+        <article class="details-card"><div class="card-heading"><div><div class="eyebrow">PAGE DETAILS</div><h3 id="page-title">Page metadata</h3></div><span id="content-type" class="muted-tag">Content type</span></div>
+          <dl class="detail-list"><div><dt>Final URL</dt><dd id="final-url">—</dd></div><div><dt>Meta description</dt><dd id="meta-description">—</dd></div><div><dt>H1 headings</dt><dd id="h1-headings">—</dd></div><div><dt>HTML language</dt><dd id="html-lang">—</dd></div><div><dt>Viewport meta tag</dt><dd id="viewport-meta">—</dd></div><div><dt>Response size</dt><dd id="response-size">—</dd></div></dl>
+        </article>
+        <article class="details-card findings-card"><div class="card-heading"><div><div class="eyebrow">WHAT NEEDS ATTENTION</div><h3>Findings</h3></div><span id="finding-count" class="muted-tag">0 items</span></div><div id="findings-list" class="findings-list"></div></article>
+        <p class="limitations">Phase 1 checks the HTTP response and returned HTML only. It does not execute JavaScript, capture screenshots, or replace a full Lighthouse/security assessment.</p>
+      </section>
+      <section class="bottom-note"><div class="note-icon">i</div><div><b>Built with safety in mind</b><p>Private and local addresses are blocked. This development server binds to 127.0.0.1 and should not be exposed publicly without additional protections.</p></div></section>
+    </main>
+    <footer><span>WEBSITE AUDIT STUDIO</span><span>LOCAL MVP · PHASE 1</span></footer>
+  </div>
+</body>
+</html>
