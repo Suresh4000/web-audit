@@ -105,7 +105,7 @@ function cleanText(value) {
 }
 
 function attr(tag, name) {
-  const matches = [...tag.matchAll(/([^\\s=]+)\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))/g)];
+  const matches = [...tag.matchAll(/([^\s=]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g)];
   const match = matches.find(item => item[1].toLowerCase() === name.toLowerCase());
   return match ? (match[2] ?? match[3] ?? match[4] ?? null) : null;
 }
