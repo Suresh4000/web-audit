@@ -111,9 +111,10 @@ function attr(tag, name) {
 }
 
 function extractPage(html, contentType, baseUrl) {
-  const isHtml = /text\\/html|application\\/xhtml\\+xml/i.test(contentType);
+  const isHtml = /text\/html|application\/xhtml\+xml/i.test(contentType);
   if (!isHtml) return { isHtml: false, title: null, titleLength: 0, metaDescription: null, metaDescriptionLength: 0, h1Headings: [], h2Count: 0, htmlLang: null, viewportMeta: false, canonical: null, robotsMeta: null, openGraphTitle: null, openGraphDescription: null, images: { total: 0, missingAlt: 0 }, links: { internal: 0, external: 0, empty: 0 }, mixedContent: 0, structuredData: false, formCount: 0 };
-  const tags = [...html.matchAll(/<meta\\b[^>]*>/gi)].map(m => m[0]);
+
+  const tags = [...html.matchAll(/<meta\b[^>]*>/gi)].map(m => m[0]);
   const meta = (name) => {
     const tag = tags.find(t => (attr(t, 'name') || '').toLowerCase() === name.toLowerCase());
     return tag ? attr(tag, 'content') : null;
@@ -122,24 +123,29 @@ function extractPage(html, contentType, baseUrl) {
     const tag = tags.find(t => (attr(t, 'property') || '').toLowerCase() === name.toLowerCase());
     return tag ? attr(tag, 'content') : null;
   };
-  const title = cleanText(html.match(/<title\\b[^>]*>([\\s\\S]*?)<\\/title\\s*>/i)?.[1]);
+  const title = cleanText(html.match(/<title\b[^>]*>([\s\S]*?)<\/title\s*>/i)?.[1]);
   const description = cleanText(meta('description'));
-  const htmlOpen = html.match(/<html\\b[^>]*>/i)?.[0] ?? '';
-  const canonicalTag = [...html.matchAll(/<link\\b[^>]*>/gi)].map(m => m[0]).find(t => /\\brel\\s*=\\s*(["'])canonical\\1/i.test(t));
-  const images = [...html.matchAll(/<img\\b[^>]*>/gi)].map(m => m[0]);
-  const links = [...html.matchAll(/<a\\b[^>]*>/gi)].map(m => m[0]);
-  const h1Headings = [...html.matchAll(/<h1\\b[^>]*>([\\s\\S]*?)<\\/h1\\s*>/gi)].map(m => cleanText(m[1])).filter(Boolean);
-  const h2Count = [...html.matchAll(/<h2\\b/gi)].length;
-  const internal = [];
-  let external = 0, empty = 0;
+  const htmlOpen = html.match(/<html\b[^>]*>/i)?.[0] ?? '';
+  const canonicalTag = [...html.matchAll(/<link\b[^>]*>/gi)].map(m => m[0]).find(t => (attr(t, 'rel') || '').toLowerCase().split(/\s+/).includes('canonical'));
+  const images = [...html.matchAll(/<img\b[^>]*>/gi)].map(m => m[0]);
+  const links = [...html.matchAll(/<a\b[^>]*>/gi)].map(m => m[0]);
+  const h1Headings = [...html.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1\s*>/gi)].map(m => cleanText(m[1])).filter(Boolean);
+  const h2Count = [...html.matchAll(/<h2\b/gi)].length;
   const baseHost = new URL(baseUrl).hostname;
+  let external = 0;
+  let empty = 0;
+  let internal = 0;
   for (const tag of links) {
     const href = attr(tag, 'href');
     if (!href || !href.trim() || href.trim() === '#') { empty++; continue; }
     if (/^(javascript:|mailto:|tel:|#)/i.test(href.trim())) continue;
-    try { const u = new URL(href, baseUrl); if (u.hostname === baseHost) internal.push(u.href); else external++; } catch { /* Ignore malformed hrefs here; do not request them. */ }
+    try {
+      const u = new URL(href, baseUrl);
+      if (u.hostname === baseHost) internal++;
+      else external++;
+    } catch { /* Ignore malformed hrefs; never request them from this check. */ }
   }
-  const mixedContent = [...html.matchAll(/(?:src|href)\\s*=\\s*(["'])http:\\/\\//gi)].length;
+  const mixedContent = [...html.matchAll(/(?:src|href)\s*=\s*(["'])http:\/\//gi)].length;
   return {
     isHtml: true,
     title,
@@ -149,16 +155,16 @@ function extractPage(html, contentType, baseUrl) {
     h1Headings,
     h2Count,
     htmlLang: attr(htmlOpen, 'lang'),
-    viewportMeta: tags.some(t => /\\bname\\s*=\\s*(["'])viewport\\1/i.test(t)),
+    viewportMeta: tags.some(t => (attr(t, 'name') || '').toLowerCase() === 'viewport'),
     canonical: canonicalTag ? attr(canonicalTag, 'href') : null,
     robotsMeta: meta('robots'),
     openGraphTitle: property('og:title'),
     openGraphDescription: property('og:description'),
     images: { total: images.length, missingAlt: images.filter(t => attr(t, 'alt') === null).length },
-    links: { internal: internal.length, external, empty },
+    links: { internal, external, empty },
     mixedContent,
-    structuredData: /<script\\b[^>]*type\\s*=\\s*(["'])application\\/ld\\+json\\1/i.test(html),
-    formCount: [...html.matchAll(/<form\\b/gi)].length
+    structuredData: /<script\b[^>]*type\s*=\s*(["'])application\/ld\+json\1/i.test(html),
+    formCount: [...html.matchAll(/<form\b/gi)].length
   };
 }
 
