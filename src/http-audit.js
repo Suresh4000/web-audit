@@ -154,7 +154,8 @@ export async function runHttpAudit(inputUrl, options = {}) {
     visited.add(currentUrl.href);
 
     // Resolve and validate every hop, including redirect targets.
-console.log('DNS addresses:', JSON.stringify(addresses));
+const addresses = await resolveAndValidateHost(currentUrl.hostname);
+    console.log('DNS addresses:', JSON.stringify(addresses));
     response = await requestOnce(currentUrl, addresses, { timeoutMs, maxBytes });
 
     const location = response.headers.location;
