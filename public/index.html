@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1220" />
+  <meta name="description" content="Run a website quality audit covering on-page SEO, HTTP performance indicators, security headers, and accessibility signals." />
   <title>Website Audit Studio</title>
   <link rel="stylesheet" href="/styles.css" />
   <script src="/app.js" defer></script>
@@ -11,21 +12,21 @@
 <body>
   <div class="shell">
     <header class="topbar">
-      <a class="brand" href="/"><span class="brand-mark">WA</span><span>Website <b>Audit Studio</b><small>PHASE 1 · HTTP AUDIT</small></span></a>
-      <span class="local-pill"><span></span> LOCAL WORKSPACE</span>
+      <a class="brand" href="/"><span class="brand-mark">WA</span><span>Website <b>Audit Studio</b><small>WEBSITE QUALITY REPORT</small></span></a>
+      <span class="local-pill"><span></span> AUDIT WORKSPACE</span>
     </header>
     <main>
       <section class="hero">
-        <div class="eyebrow"><span class="eyebrow-line"></span> WEBSITE HEALTH CHECK</div>
-        <h1>Know what your website<br /><span>is telling the world.</span></h1>
-        <p>Run a quick HTTP and on-page SEO audit. Get response details, essential metadata checks, and actionable findings in one place.</p>
+        <div class="eyebrow"><span class="eyebrow-line"></span> WEBSITE HEALTH & QUALITY</div>
+        <h1>See what is holding<br /><span>your website back.</span></h1>
+        <p>Review SEO fundamentals, response performance, security headers, and accessibility signals. Get category scores, evidence, and practical next steps in one report.</p>
         <form id="audit-form" class="audit-form">
           <label class="sr-only" for="url-input">Website URL</label>
-          <span class="url-icon">↗</span>
-          <input id="url-input" type="url" placeholder="https://example.com" value="https://example.com" autocomplete="url" required />
-          <button id="audit-button" type="submit"><span>Run audit</span><span aria-hidden="true">→</span></button>
+          <span class="url-icon" aria-hidden="true">↗</span>
+          <input id="url-input" type="url" placeholder="https://yourwebsite.com" value="https://example.com" autocomplete="url" required />
+          <button id="audit-button" type="submit"><span>Run full audit</span><span aria-hidden="true">→</span></button>
         </form>
-        <div class="form-note"><span class="lock">♧</span> HTTP and HTTPS only · Public websites only · No browser rendering yet</div>
+        <div class="form-note"><span class="lock">●</span> Public HTTP(S) pages only · Safe, bounded requests · No JavaScript rendering yet</div>
       </section>
 
       <section id="status-panel" class="status-panel" aria-live="polite" hidden>
@@ -35,22 +36,39 @@
       </section>
 
       <section id="results" hidden>
-        <div class="section-heading"><div><div class="eyebrow">AUDIT OVERVIEW</div><h2>Results</h2></div><button id="download-json" class="secondary-button" type="button">Export JSON ↗</button></div>
+        <div class="section-heading"><div><div class="eyebrow">AUDIT OVERVIEW</div><h2>Your website report</h2><p class="section-subtitle">Scores are based on the checks this HTTP-only audit can observe.</p></div><button id="download-json" class="secondary-button" type="button">Export JSON ↗</button></div>
+        <div id="score-grid" class="score-grid"></div>
+        <div class="severity-summary" aria-label="Findings by severity">
+          <div><span class="severity-dot high"></span><small>High</small><strong id="count-high">0</strong></div>
+          <div><span class="severity-dot medium"></span><small>Medium</small><strong id="count-medium">0</strong></div>
+          <div><span class="severity-dot low"></span><small>Low</small><strong id="count-low">0</strong></div>
+          <div><span class="severity-dot info"></span><small>Info</small><strong id="count-info">0</strong></div>
+        </div>
         <div class="stats-grid">
           <article class="stat-card"><span>HTTP STATUS</span><strong id="stat-status">—</strong><small id="stat-status-note">Response code</small></article>
-          <article class="stat-card"><span>RESPONSE TIME</span><strong id="stat-time">—</strong><small>Time to receive response</small></article>
-          <article class="stat-card"><span>FINDINGS</span><strong id="stat-findings">—</strong><small>Items to review</small></article>
+          <article class="stat-card"><span>RESPONSE TIME</span><strong id="stat-time">—</strong><small>Single request measurement</small></article>
+          <article class="stat-card"><span>FINDINGS</span><strong id="stat-findings">—</strong><small>Recommendations to review</small></article>
           <article class="stat-card"><span>REDIRECTS</span><strong id="stat-redirects">—</strong><small>Redirect hops detected</small></article>
         </div>
-        <article class="details-card"><div class="card-heading"><div><div class="eyebrow">PAGE DETAILS</div><h3 id="page-title">Page metadata</h3></div><span id="content-type" class="muted-tag">Content type</span></div>
-          <dl class="detail-list"><div><dt>Final URL</dt><dd id="final-url">—</dd></div><div><dt>Meta description</dt><dd id="meta-description">—</dd></div><div><dt>H1 headings</dt><dd id="h1-headings">—</dd></div><div><dt>HTML language</dt><dd id="html-lang">—</dd></div><div><dt>Viewport meta tag</dt><dd id="viewport-meta">—</dd></div><div><dt>Response size</dt><dd id="response-size">—</dd></div></dl>
+        <article class="details-card"><div class="card-heading"><div><div class="eyebrow">PAGE & SEO DETAILS</div><h3 id="page-title">Page metadata</h3></div><span id="content-type" class="muted-tag">Content type</span></div>
+          <dl class="detail-list">
+            <div><dt>Final URL</dt><dd id="final-url">—</dd></div><div><dt>Meta description</dt><dd id="meta-description">—</dd></div><div><dt>H1 headings</dt><dd id="h1-headings">—</dd></div><div><dt>HTML language</dt><dd id="html-lang">—</dd></div><div><dt>Viewport meta tag</dt><dd id="viewport-meta">—</dd></div><div><dt>Canonical URL</dt><dd id="canonical-url">—</dd></div><div><dt>Robots meta</dt><dd id="robots-meta">—</dd></div><div><dt>Open Graph metadata</dt><dd id="og-summary">—</dd></div><div><dt>Structured data</dt><dd id="structured-data">—</dd></div><div><dt>Images</dt><dd id="image-summary">—</dd></div><div><dt>Links</dt><dd id="link-summary">—</dd></div><div><dt>Response size</dt><dd id="response-size">—</dd></div>
+          </dl>
         </article>
-        <article class="details-card findings-card"><div class="card-heading"><div><div class="eyebrow">WHAT NEEDS ATTENTION</div><h3>Findings</h3></div><span id="finding-count" class="muted-tag">0 items</span></div><div id="findings-list" class="findings-list"></div></article>
-        <p class="limitations">Phase 1 checks the HTTP response and returned HTML only. It does not execute JavaScript, capture screenshots, or replace a full Lighthouse/security assessment.</p>
+        <article class="details-card"><div class="card-heading"><div><div class="eyebrow">SERVER CONFIGURATION</div><h3>HTTP response signals</h3></div></div>
+          <dl class="detail-list"><div><dt>Server header</dt><dd id="server-header">—</dd></div><div><dt>Cache-Control</dt><dd id="cache-header">—</dd></div></dl>
+        </article>
+        <article class="details-card findings-card">
+          <div class="card-heading"><div><div class="eyebrow">PRIORITISED ACTION PLAN</div><h3>Findings & recommendations</h3></div><span id="finding-count" class="muted-tag">0 findings</span></div>
+          <div class="filter-row"><label for="finding-filter">Filter findings</label><select id="finding-filter"><option value="all">All findings</option><option value="high">High severity</option><option value="medium">Medium severity</option><option value="low">Low severity</option><option value="info">Informational</option><option value="seo">SEO</option><option value="performance">Performance</option><option value="security">Security</option><option value="accessibility">Accessibility</option></select></div>
+          <div id="findings-list" class="findings-list"></div>
+        </article>
+        <article id="checks-section" class="details-card"><div class="card-heading"><div><div class="eyebrow">AUDIT TRANSPARENCY</div><h3>All checks performed</h3></div><span id="check-count" class="muted-tag">0 checks</span></div><div id="checks-list" class="checks-list"></div></article>
+        <article class="details-card limitations-card"><div class="eyebrow">SCOPE & LIMITATIONS</div><h3>What this report can and cannot tell you</h3><ul id="limitations-list"></ul></article>
       </section>
-      <section class="bottom-note"><div class="note-icon">i</div><div><b>Built with safety in mind</b><p>Private and local addresses are blocked. This development server binds to 127.0.0.1 and should not be exposed publicly without additional protections.</p></div></section>
+      <section class="bottom-note"><div class="note-icon">i</div><div><b>Interpret scores as diagnostic signals</b><p>This version inspects the returned HTTP response and HTML. It does not run JavaScript, crawl every page, measure Core Web Vitals, or perform a full WCAG or penetration test. Use the recommendations as a starting point, not a compliance guarantee.</p></div></section>
     </main>
-    <footer><span>WEBSITE AUDIT STUDIO</span><span>LOCAL MVP · PHASE 1</span></footer>
+    <footer><span>WEBSITE AUDIT STUDIO</span><span>HTTP-BASED QUALITY AUDIT</span></footer>
   </div>
 </body>
 </html>
