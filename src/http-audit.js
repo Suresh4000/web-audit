@@ -105,20 +105,21 @@ function cleanText(value) {
 }
 
 function attr(tag, name) {
-  const escaped = name.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&');
-  return tag.match(new RegExp('\\\\b' + escaped + '\\\\s*=\\\\s*(["\\\\'])([\\\\s\\\\S]*?)\\\\1', 'i'))?.[2] ?? null;
+  const matches = [...tag.matchAll(/([^\\s=]+)\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))/g)];
+  const match = matches.find(item => item[1].toLowerCase() === name.toLowerCase());
+  return match ? (match[2] ?? match[3] ?? match[4] ?? null) : null;
 }
 
-function extractPage(html, contentType) {
+function extractPage(html, contentType, baseUrl) {
   const isHtml = /text\\/html|application\\/xhtml\\+xml/i.test(contentType);
   if (!isHtml) return { isHtml: false, title: null, titleLength: 0, metaDescription: null, metaDescriptionLength: 0, h1Headings: [], h2Count: 0, htmlLang: null, viewportMeta: false, canonical: null, robotsMeta: null, openGraphTitle: null, openGraphDescription: null, images: { total: 0, missingAlt: 0 }, links: { internal: 0, external: 0, empty: 0 }, mixedContent: 0, structuredData: false, formCount: 0 };
   const tags = [...html.matchAll(/<meta\\b[^>]*>/gi)].map(m => m[0]);
   const meta = (name) => {
-    const tag = tags.find(t => new RegExp('\\\\bname\\\\s*=\\\\s*(["\\\\'])' + name + '\\\\1', 'i').test(t));
+    const tag = tags.find(t => (attr(t, 'name') || '').toLowerCase() === name.toLowerCase());
     return tag ? attr(tag, 'content') : null;
   };
   const property = (name) => {
-    const tag = tags.find(t => new RegExp('\\\\bproperty\\\\s*=\\\\s*(["\\\\'])' + name + '\\\\1', 'i').test(t));
+    const tag = tags.find(t => (attr(t, 'property') || '').toLowerCase() === name.toLowerCase());
     return tag ? attr(tag, 'content') : null;
   };
   const title = cleanText(html.match(/<title\\b[^>]*>([\\s\\S]*?)<\\/title\\s*>/i)?.[1]);
@@ -131,12 +132,12 @@ function extractPage(html, contentType) {
   const h2Count = [...html.matchAll(/<h2\\b/gi)].length;
   const internal = [];
   let external = 0, empty = 0;
-  const baseHost = (() => { try { return new URL(html.match(/<link\\b[^>]*>/i)?.[0] ? attr(html.match(/<link\\b[^>]*>/i)[0], 'href') : 'https://invalid.local').hostname; } catch { return 'invalid.local'; } })();
+  const baseHost = new URL(baseUrl).hostname;
   for (const tag of links) {
     const href = attr(tag, 'href');
     if (!href || !href.trim() || href.trim() === '#') { empty++; continue; }
     if (/^(javascript:|mailto:|tel:|#)/i.test(href.trim())) continue;
-    try { const u = new URL(href, 'https://audit-base.invalid'); if (u.hostname === 'audit-base.invalid' || u.hostname === baseHost) internal.push(u.href); else external++; } catch { /* Ignore malformed hrefs here; do not request them. */ }
+    try { const u = new URL(href, baseUrl); if (u.hostname === baseHost) internal.push(u.href); else external++; } catch { /* Ignore malformed hrefs here; do not request them. */ }
   }
   const mixedContent = [...html.matchAll(/(?:src|href)\\s*=\\s*(["'])http:\\/\\//gi)].length;
   return {
@@ -237,7 +238,7 @@ export async function runHttpAudit(inputUrl, options = {}) {
     currentUrl = nextUrl;
   }
   const contentType = String(response.headers['content-type'] ?? '');
-  const page = extractPage(response.body, contentType);
+  const page = extractPage(response.body, contentType, currentUrl.href);
   const analysis = buildAudit(page, response, currentUrl, redirects, maxBytes);
   return {
     inputUrl,
